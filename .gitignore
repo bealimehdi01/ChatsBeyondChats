@@ -1,0 +1,7 @@
+node_modules
+vendor
+.env
+.npm
+.DS_Store
+storage/*.key
+*.phar
