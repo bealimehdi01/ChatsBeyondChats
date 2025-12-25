@@ -35,9 +35,10 @@ RUN composer install --no-interaction --optimize-autoloader
 RUN cp .env.example .env
 RUN php artisan key:generate
 
-# 7. Setup Worker (Node)
+# 7. Setup Worker (Node) - Skip Chromium (HF provides it or we'll use chromium-browser)
 WORKDIR /app/worker
-RUN npm install
+RUN PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true npm install
+RUN apt-get install -y chromium || echo "Chromium install failed, puppeteer may not work"
 
 # 8. Setup Configs & Scripts
 WORKDIR /app

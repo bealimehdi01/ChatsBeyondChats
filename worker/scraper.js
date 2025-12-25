@@ -7,12 +7,11 @@ class Scraper {
     }
 
     async init() {
-        if (!this.browser) {
-            this.browser = await puppeteer.launch({
-                headless: "new",
-                args: ['--no-sandbox', '--disable-setuid-sandbox']
-            });
-        }
+        this.browser = await puppeteer.launch({
+            headless: true,
+            executablePath: '/usr/bin/chromium' || '/usr/bin/chromium-browser',
+            args: ['--no-sandbox', '--disable-setuid-sandbox']
+        });
     }
 
     async close() {
@@ -27,13 +26,13 @@ class Scraper {
     async searchGoogle(query) {
         console.log(`Searching Google for: ${query}`);
         const page = await this.browser.newPage();
-        
+
         // basic evasion
         await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36');
-        
+
         try {
             await page.goto(`https://www.google.com/search?q=${encodeURIComponent(query)}`, { waitUntil: 'domcontentloaded' });
-            
+
             // Extract links
             const links = await page.evaluate(() => {
                 const results = [];
@@ -47,7 +46,7 @@ class Scraper {
                 }
                 return results;
             });
-            
+
             await page.close();
             return links;
         } catch (error) {
@@ -67,7 +66,7 @@ class Scraper {
 
         try {
             await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 });
-            
+
             const content = await page.evaluate(() => {
                 // Heuristic: grab p tags from the main tag or body
                 const pTags = document.querySelectorAll('p');
