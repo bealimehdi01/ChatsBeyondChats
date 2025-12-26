@@ -1,0 +1,18 @@
+[phases.setup]
+nixPkgs = ["php82", "php82Extensions.pdo", "php82Extensions.pdo_sqlite", "sqlite"]
+
+[phases.install]
+cmds = ["cd backend && composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader"]
+
+[phases.build]
+cmds = [
+  "cd backend",
+  "cp .env.example .env",
+  "php artisan key:generate",
+  "mkdir -p database storage/framework/cache storage/framework/sessions storage/framework/views storage/logs",
+  "chmod -R 777 storage database",
+  "touch database/database.sqlite"
+]
+
+[start]
+cmd = "cd backend && php artisan migrate --force && php artisan scrape:initial && php artisan serve --host=0.0.0.0 --port=${PORT:-8000}"
