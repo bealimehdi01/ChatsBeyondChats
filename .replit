@@ -1,0 +1,13 @@
+run = "cd backend && php artisan serve --host=0.0.0.0 --port=8000"
+entrypoint = "backend/public/index.php"
+
+[nix]
+channel = "stable-23_11"
+
+[deployment]
+run = ["sh", "-c", "cd backend && php artisan migrate --force && php artisan scrape:initial && php artisan serve --host=0.0.0.0 --port=8000"]
+deploymentTarget = "cloudrun"
+
+[[ports]]
+localPort = 8000
+externalPort = 80
