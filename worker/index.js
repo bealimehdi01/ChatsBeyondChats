@@ -5,7 +5,13 @@ const axios = require('axios');
 
 // Config
 const API_URL = process.env.API_URL || 'http://localhost:8000/api';
-const LLM_API_KEY = process.env.LLM_API_KEY;
+const GEMINI_API_KEY = process.env.LLM_API_KEY; // Keep old name for backward compatibility
+const PERPLEXITY_API_KEY = process.env.PERPLEXITY_API_KEY;
+
+if (!GEMINI_API_KEY && !PERPLEXITY_API_KEY) {
+    console.error('❌ ERROR: No LLM API keys configured! Set LLM_API_KEY or PERPLEXITY_API_KEY');
+    process.exit(1);
+}
 
 // 6. Start Health Check Server (Keep HF happy)
 const http = require('http');
@@ -25,7 +31,7 @@ async function runWorker() {
     console.log('Worker: Starting Job Cycle...');
 
     const scraper = new Scraper();
-    const llm = new LLMService(LLM_API_KEY);
+    const llm = new LLMService(GEMINI_API_KEY, PERPLEXITY_API_KEY);
 
     try {
         await scraper.init();

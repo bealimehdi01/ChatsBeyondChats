@@ -1,48 +1,118 @@
+const { GoogleGenerativeAI } = require('@google/generative-ai');
 const axios = require('axios');
 
 class LLMService {
-    constructor(apiKey) {
-        this.apiKey = apiKey;
-        this.endpoint = 'https://api.openai.com/v1/chat/completions'; // Example endpoint
+    constructor(geminiApiKey, perplexityApiKey) {
+        this.geminiApiKey = geminiApiKey;
+        this.perplexityApiKey = perplexityApiKey;
+
+        // Initialize Gemini if key provided
+        if (geminiApiKey) {
+            this.gemini = new GoogleGenerativeAI(geminiApiKey);
+            this.geminiModel = this.gemini.getGenerativeModel({ model: 'gemini-2.0-flash-exp' });
+        }
     }
 
-    async enhanceContent(originalContent, referenceContent) {
-        console.log('LLM: Enhancing content via Gemini...');
-        const prompt = `
-        You are an expert editor. 
-        Original Article: ${originalContent.substring(0, 2000)}...
-        
-        Reference Material: ${referenceContent.substring(0, 2000)}...
-        
-        Task: Rewrite the original article to be more comprehensive, using facts from the reference material. Maintain the tone. Return ONLY the new article text.
-        `;
-
-        if (!this.apiKey || this.apiKey.includes('YOUR_API_KEY')) {
-            console.log('LLM: No API Key provided. Returning mock enhanced content.');
-            return `[AI ENHANCED VERSION - MOCK]\n\n${originalContent}\n\n[Added from Reference]:\n${referenceContent.substring(0, 500)}...`;
+    async enhanceWithGemini(originalContent, referenceText) {
+        if (!this.geminiApiKey) {
+            throw new Error('Gemini API key not configured');
         }
 
-        try {
-            // GEMINI-FLASH-LATEST (Validated via list_models.js)
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${this.apiKey}`;
+        const prompt = `You are a professional content writer. Rewrite the following article to match the quality and style of top-ranking content. Use the reference content for inspiration, but create original content.
 
+Original Article:
+${originalContent}
 
-            const response = await axios.post(url, {
-                contents: [{
-                    parts: [{ text: prompt }]
-                }]
-            }, {
-                headers: { 'Content-Type': 'application/json' }
-            });
+Reference Content (for style and depth):
+${referenceText}
 
-            if (response.data && response.data.candidates && response.data.candidates.length > 0) {
-                return response.data.candidates[0].content.parts[0].text;
+Rewrite the article to be comprehensive, well-structured, and engaging. Make it at least as detailed as the references.`;
+
+        const result = await this.geminiModel.generateContent(prompt);
+        const response = await result.response;
+        return response.text();
+    }
+
+    async enhanceWithPerplexity(originalContent, referenceText) {
+        if (!this.perplexityApiKey) {
+            throw new Error('Perplexity API key not configured');
+        }
+
+        const prompt = `You are a professional content writer. Rewrite the following article to match the quality and style of top-ranking content. Use the reference content for inspiration, but create original content.
+
+Original Article:
+${originalContent}
+
+Reference Content (for style and depth):
+${referenceText}
+
+Rewrite the article to be comprehensive, well-structured, and engaging. Make it at least as detailed as the references.`;
+
+        const response = await axios.post(
+            'https://api.perplexity.ai/chat/completions',
+            {
+                model: 'llama-3.1-sonar-small-128k-online',
+                messages: [
+                    {
+                        role: 'system',
+                        content: 'You are a professional content writer who creates high-quality, comprehensive articles.'
+                    },
+                    {
+                        role: 'user',
+                        content: prompt
+                    }
+                ],
+                temperature: 0.7,
+                max_tokens: 2000
+            },
+            {
+                headers: {
+                    'Authorization': `Bearer ${this.perplexityApiKey}`,
+                    'Content-Type': 'application/json'
+                }
             }
-            return originalContent;
-        } catch (error) {
-            console.error('LLM API Error:', error.response ? error.response.data : error.message);
-            return originalContent; // Fallback
+        );
+
+        return response.data.choices[0].message.content;
+    }
+
+    async enhanceContent(originalContent, referenceText) {
+        // Try Gemini first
+        if (this.geminiApiKey) {
+            try {
+                console.log('LLM: Attempting enhancement via Gemini...');
+                const result = await this.enhanceWithGemini(originalContent, referenceText);
+                console.log('LLM: ✅ Enhanced successfully with Gemini');
+                return result;
+            } catch (error) {
+                console.warn('LLM: ⚠️ Gemini failed:', error.message);
+
+                // If Gemini fails due to rate limit or any error, try Perplexity
+                if (this.perplexityApiKey) {
+                    console.log('LLM: Falling back to Perplexity...');
+                    try {
+                        const result = await this.enhanceWithPerplexity(originalContent, referenceText);
+                        console.log('LLM: ✅ Enhanced successfully with Perplexity');
+                        return result;
+                    } catch (perplexityError) {
+                        console.error('LLM: ❌ Perplexity also failed:', perplexityError.message);
+                        throw new Error(`Both LLM providers failed. Gemini: ${error.message}, Perplexity: ${perplexityError.message}`);
+                    }
+                } else {
+                    throw error; // No fallback available
+                }
+            }
         }
+
+        // If no Gemini key, try Perplexity directly
+        if (this.perplexityApiKey) {
+            console.log('LLM: Using Perplexity (no Gemini key configured)...');
+            const result = await this.enhanceWithPerplexity(originalContent, referenceText);
+            console.log('LLM: ✅ Enhanced successfully with Perplexity');
+            return result;
+        }
+
+        throw new Error('No LLM API keys configured');
     }
 }
 
