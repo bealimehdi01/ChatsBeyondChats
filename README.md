@@ -172,6 +172,8 @@ LLM_API_KEY=[your-gemini-key]
 | **AI/LLM** | Google Gemini API |
 | **Deployment** | Vercel (Frontend), Replit (Backend + Worker) |
 
+> **Note on Deployment**: Replit was used solely as a hosting platform for the backend and worker services. All code was developed locally using VS Code and tested with the `start_all.ps1` script. Replit provides free hosting for PHP and Node.js applications, making it ideal for deploying this full-stack system without cost.
+
 ## 📦 Project Structure
 
 ```
