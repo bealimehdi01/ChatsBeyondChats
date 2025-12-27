@@ -16,6 +16,36 @@ A full-stack AI content platform that scrapes, enhances, and displays articles u
 | **Backend API** | [https://a39dd7fb-142d-4563-b080-e180989e306f-00-2pjgspya016n2.pike.replit.dev:8000/api/articles](https://a39dd7fb-142d-4563-b080-e180989e306f-00-2pjgspya016n2.pike.replit.dev:8000/api/articles) | ✅ Live |
 | **Worker** | Running on Replit (background service) | ✅ Active |
 
+## 💡 What Does This App Do?
+
+Think of this as an **"Automatic Blog Improver"** - it takes old, outdated articles and uses AI to rewrite them to match the quality of top-ranking Google results.
+
+### 1️⃣ The Interface (What You See)
+
+A **React dashboard** that displays articles with a **side-by-side comparison**:
+
+- 📄 **Original**: The old article exactly as it appeared on BeyondChats blog
+- ✨ **Enhanced**: The new AI-rewritten version with better formatting and updated information
+- 📱 **Responsive**: Works seamlessly on mobile and desktop
+
+### 2️⃣ The Background Work (How It Works)
+
+The app performs a **four-step automated cycle**:
+
+1. **Finds Old Content** 📚  
+   Scrapes the 5 oldest blog posts from BeyondChats website
+
+2. **Researches Competitors** 🔍  
+   Takes each article title (e.g., "How to use Chatbots") → Searches Google → Finds top 2 results from competitors → Analyzes what makes them rank
+
+3. **Rewrites Using AI** 🤖  
+   Sends original article + competitor insights to Google Gemini → AI rewrites to match quality and formatting of top results
+
+4. **Publishes** 📝  
+   Saves enhanced version to database → Adds competitor links as references at bottom
+
+**Result**: Old content automatically transformed into ranking-quality content, displayed on a professional web interface.
+
 ## 📋 Assignment Completion
 
 **Phase 1: Laravel Backend ✅**
