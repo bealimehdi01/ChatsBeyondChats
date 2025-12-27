@@ -18,7 +18,13 @@ class LLMService {
             throw new Error('Gemini API key not configured');
         }
 
-        const prompt = `You are a professional content writer. Rewrite the following article to match the quality and style of top-ranking content. Use the reference content for inspiration, but create original content.
+        const prompt = `You are a professional content writer. Rewrite the following article to match the quality and style of top-ranking content.
+
+IMPORTANT RULES:
+- Do NOT use inline citation numbers like [1], [2], etc.
+- Write naturally without any bracketed references in the text
+- Create original, comprehensive content inspired by the references
+- If you want to cite sources, add a "Sources:" section at the very end with actual URLs
 
 Original Article:
 ${originalContent}
@@ -38,7 +44,13 @@ Rewrite the article to be comprehensive, well-structured, and engaging. Make it 
             throw new Error('Perplexity API key not configured');
         }
 
-        const prompt = `You are a professional content writer. Rewrite the following article to match the quality and style of top-ranking content. Use the reference content for inspiration, but create original content.
+        const prompt = `You are a professional content writer. Rewrite the following article to match the quality and style of top-ranking content.
+
+IMPORTANT RULES:
+- Do NOT use inline citation numbers like [1], [2], etc.
+- Write naturally without any bracketed references in the text
+- Create original, comprehensive content inspired by the references
+- If you want to cite sources, add a "Sources:" section at the very end with actual URLs
 
 Original Article:
 ${originalContent}
