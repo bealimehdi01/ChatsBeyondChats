@@ -1,6 +1,6 @@
 import React from 'react';
 
-const Navbar = ({ onNavigateHome }) => {
+const Navbar = ({ onNavigateHome, onNavigateAbout, currentView }) => {
     return (
         <nav className="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-md border-b border-gray-100 h-16 flex items-center justify-between px-8">
             {/* Logo - clickable */}
@@ -15,15 +15,17 @@ const Navbar = ({ onNavigateHome }) => {
             <div className="hidden md:flex items-center gap-6 text-sm font-medium text-gray-500">
                 <button
                     onClick={onNavigateHome}
-                    className="text-gray-900 hover:text-purple-600 transition font-semibold"
+                    className={`transition font-semibold ${currentView === 'dashboard' ? 'text-purple-600' : 'hover:text-purple-600'
+                        }`}
                 >
                     Dashboard
                 </button>
                 <button
-                    onClick={onNavigateHome}
-                    className="hover:text-purple-600 transition"
+                    onClick={onNavigateAbout}
+                    className={`transition ${currentView === 'about' ? 'text-purple-600' : 'hover:text-purple-600'
+                        }`}
                 >
-                    Articles
+                    About
                 </button>
             </div>
 
