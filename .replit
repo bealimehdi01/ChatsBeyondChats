@@ -1,4 +1,4 @@
-run = "cd backend && php artisan serve --host=0.0.0.0 --port=8000"
+run = "chmod +x start-both.sh && bash start-both.sh"
 entrypoint = "backend/public/index.php"
 
 [nix]
