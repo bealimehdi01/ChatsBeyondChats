@@ -36,21 +36,38 @@ async function runWorker() {
     try {
         await scraper.init();
 
-        // 1. Fetch latest article
+        // 1. Fetch oldest ORIGINAL article that doesn't have an enhanced version yet
         let article;
         try {
-            console.log('Worker: Fetching latest article from API...');
-            const res = await axios.get(`${API_URL}/articles/latest`);
-            article = res.data;
+            console.log('Worker: Fetching articles from API...');
+            const allArticles = await axios.get(`${API_URL}/articles`);
+
+            // Find original articles that don't have enhanced versions
+            const originalArticles = allArticles.data.filter(a => a.source === 'original');
+            const enhancedArticles = allArticles.data.filter(a => a.source === 'enhanced');
+
+            // Find originals without enhancements
+            const unenhancedOriginals = originalArticles.filter(original => {
+                return !enhancedArticles.some(enhanced =>
+                    enhanced.original_article_id === original.id
+                );
+            });
+
+            if (unenhancedOriginals.length === 0) {
+                console.log('Worker: All articles already enhanced! Nothing to do.');
+                return;
+            }
+
+            // Get the oldest unenhanced article
+            article = unenhancedOriginals.sort((a, b) =>
+                new Date(a.created_at) - new Date(b.created_at)
+            )[0];
+
+            console.log(`Worker: Found unenhanced article: "${article.title}"`);
+
         } catch (e) {
             console.warn('Worker: No articles found. Waiting...');
             return; // Skip this cycle
-        }
-
-        // Only process if not already enhanced
-        if (article.source === 'enhanced') {
-            console.log('Worker: Latest article is already enhanced. Skipping.');
-            return;
         }
 
         console.log(`Worker: Processing article "${article.title}"`);
