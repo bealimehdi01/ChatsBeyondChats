@@ -81,7 +81,7 @@ async function runWorker() {
     }
 }
 
-// Run every 60 seconds
-console.log('Worker Application Started. Polling every 60s.');
+// Run every 5 minutes to respect Gemini API rate limits
+console.log('Worker Application Started. Polling every 5 minutes.');
 runWorker(); // First run immediately
-setInterval(runWorker, 60000);
+setInterval(runWorker, 5 * 60 * 1000); // 5 minutes
