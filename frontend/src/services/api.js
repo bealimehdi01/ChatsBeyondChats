@@ -51,7 +51,16 @@ export const getArticle = async (id) => {
             source: "original",
             created_at: "2023-10-27"
         };
-    }
-};
+    };
 
-export default api;
+    export const deleteArticle = async (id) => {
+        try {
+            const response = await api.delete(`/articles/${id}`);
+            return response.data;
+        } catch (error) {
+            console.error("API Error - deleteArticle:", error);
+            throw error;
+        }
+    };
+
+    export default api;
