@@ -152,7 +152,15 @@ class ScrapeArticles extends Command
         $articles = [
             [
                 'title' => 'Chatbots Magic: Beginner\'s Guidebook',
-                'content' => 'Embrace the evolution by understanding your website\'s unique needs and leveraging Chatbots to create meaningful user experiences. This comprehensive guide covers everything from basic setup to advanced implementation strategies.',
+                'content' => 'Chatbots have transformed the way businesses interact with customers. From simple rule-based systems to sophisticated AI-powered assistants, the evolution of chatbot technology represents a significant leap in customer service automation.
+
+Understanding chatbot fundamentals begins with recognizing the two primary types: rule-based and AI-powered. Rule-based chatbots follow predefined decision trees, making them ideal for handling straightforward queries with consistent responses. They excel in scenarios where user inputs are predictable and limited in scope.
+
+AI-powered chatbots, on the other hand, leverage natural language processing (NLP) and machine learning to understand context, sentiment, and intent. These advanced systems can handle complex conversations, learn from interactions, and provide increasingly personalized responses over time.
+
+The implementation process requires careful planning. Businesses must first identify their primary use cases, whether for customer support, lead generation, or information dissemination. Understanding your audience\'s needs and common pain points helps in designing effective conversation flows.
+
+Integration with existing systems is crucial for seamless operation. Modern chatbots can connect with CRM platforms, knowledge bases, and analytics tools, creating a unified ecosystem that enhances both customer experience and operational efficiency.',
                 'original_url' => 'https://beyondchats.com/blogs/chatbots-magic-beginners-guidebook',
                 'source' => 'original',
                 'created_at' => now()->subDays(4),
@@ -160,39 +168,39 @@ class ScrapeArticles extends Command
             ],
             [
                 'title' => 'From 0 to Sales Hero: How Sales Chatbots Increase Conversions',
-                'content' => 'A sales chatbot acts as a tireless assistant, efficiently handling customer queries for seamless interactions. Learn how modern chatbots can transform your sales pipeline.',
+                'content' => 'Sales chatbots have emerged as game-changers in the digital marketplace. By providing instant, personalized responses to potential customers, these AI-powered assistants bridge the gap between browsing and buying, significantly boosting conversion rates.
+
+The power of sales chatbots lies in their 24/7 availability. Unlike human sales representatives who work fixed hours, chatbots engage with prospects at any time, capturing leads that might otherwise be lost. This constant presence ensures that no sales opportunity slips through the cracks due to timing constraints.
+
+Personalization drives sales success, and modern chatbots excel at tailoring interactions based on user behavior, browsing history, and preferences. By analyzing real-time data, they can recommend products, answer specific questions, and guide customers through the purchasing journey with relevant suggestions.
+
+Lead qualification becomes more efficient with chatbots handling initial interactions. They can ask qualifying questions, assess customer readiness, and route high-potential leads to human sales representatives. This streamlined process allows sales teams to focus their efforts on closing deals rather than initial screening.
+
+The integration of chatbots with CRM systems creates a powerful sales ecosystem. Every interaction is logged, providing valuable insights into customer behavior, common objections, and successful conversion patterns. This data-driven approach enables continuous optimization of sales strategies.',
                 'original_url' => 'https://beyondchats.com/blogs/sales-chatbots-increase-conversions',
                 'source' => 'original',
                 'created_at' => now()->subDays(3),
                 'updated_at' => now(),
             ],
             [
-                'title' => 'Can Chatbots Boost Your E-commerce Conversions?',
-                'content' => 'Integrating chatbots into e-commerce is more than a tech upgrade—it\'s a transformative strategy reshaping online shopping.',
-                'original_url' => 'https://beyondchats.com/blogs/chatbots-ecommerce-conversions',
+                'title' => 'Types of Chatbots',
+                'content' => 'The chatbot landscape encompasses various types, each designed to serve specific purposes and operate through different mechanisms. Understanding these distinctions helps businesses select the right solution for their needs.
+
+Rule-based chatbots operate on predefined decision trees and scripted responses. They follow if-then logic, making them predictable and easy to implement. These chatbots excel in handling frequently asked questions and guiding users through straightforward processes. Their main limitation is inflexibility - they cannot handle queries outside their programmed scenarios.
+
+AI-based chatbots leverage natural language processing and machine learning algorithms. They can understand context, interpret user intent, and generate dynamic responses. Unlike their rule-based counterparts, AI chatbots improve over time, learning from each interaction to provide increasingly accurate and helpful responses.
+
+Hybrid chatbots combine the reliability of rule-based systems with the intelligence of AI. They use rules for common scenarios while deploying AI for complex queries. This approach offers the best of both worlds: consistent responses for routine questions and intelligent handling of unique situations.
+
+Voice-enabled chatbots represent another category, utilizing speech recognition and natural language understanding to facilitate voice-based interactions. These are particularly useful for hands-free scenarios and accessibility purposes, expanding chatbot utility beyond text-based platforms.',
+                'original_url' => 'https://beyondchats.com/blogs/types-of-chatbots',
                 'source' => 'original',
                 'created_at' => now()->subDays(2),
-                'updated_at' => now(),
-            ],
-            [
-                'title' => '10 Solutions for Common Customer Service Issues',
-                'content' => 'We explore common customer service issues and offer simple, innovative solutions to transform challenges into better customer experiences.',
-                'original_url' => 'https://beyondchats.com/blogs/customer-service-solutions',
-                'source' => 'original',
-                'created_at' => now()->subDays(1),
-                'updated_at' => now(),
-            ],
-            [
-                'title' => '10X Your Leads: How Chatbots Revolutionize Lead Generation',
-                'content' => 'Explore lead generation chatbots: discover their benefits, effective strategies, best practices, and the path to e-commerce success.',
-                'original_url' => 'https://beyondchats.com/blogs/chatbots-lead-generation',
-                'source' => 'original',
-                'created_at' => now(),
                 'updated_at' => now(),
             ],
         ];
 
         Article::insert($articles);
-        $this->info('Inserted fallback articles from pages 14-15.');
+        $this->info('Inserted fallback articles with full content.');
     }
 }
