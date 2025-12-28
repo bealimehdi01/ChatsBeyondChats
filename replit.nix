@@ -5,10 +5,10 @@
     pkgs.sqlite
     pkgs.nodejs_20
     pkgs.chromium
-    pkgs.glib
-    pkgs.nss
-    pkgs.freetype
-    pkgs.harfbuzz
-    pkgs.ca-certificates
   ];
+  env = {
+    PYTHON_LD_LIBRARY_PATH = pkgs.lib.makeLibraryPath [
+      pkgs.chromium
+    ];
+  };
 }
