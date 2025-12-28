@@ -24,7 +24,7 @@ let
     pkgs.xorg.libxcb
     pkgs.xorg.libXcomposite
     pkgs.xorg.libXcursor
-    pkgs.xorg.libXxi
+    pkgs.xorg.libXi
     pkgs.xorg.libXScrnSaver
     pkgs.xorg.libXtst
   ];
