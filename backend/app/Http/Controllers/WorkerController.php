@@ -32,6 +32,9 @@ class WorkerController extends Controller
         return response()->json(['message' => 'Settings updated', 'settings' => $settings]);
     }
     
+    // Trigger manual article scraping
+    public function scrape(Request $request)
+    {
         $sourceUrl = $request->input('source_url', 'https://beyondchats.com/blogs/');
         
         // 1. Fetch the main blog page
