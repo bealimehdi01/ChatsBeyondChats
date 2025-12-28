@@ -35,69 +35,82 @@ class WorkerController extends Controller
     // Trigger manual article scraping
     public function scrape(Request $request)
     {
-        $sourceUrl = $request->input('source_url', 'https://beyondchats.com/blogs/');
-        
-        // 1. Fetch the main blog page
-        try {
-            $response = Http::timeout(30)->get($sourceUrl);
-            
-            if (!$response->successful()) {
-                return response()->json(['error' => 'Failed to reach source URL'], 500);
-            }
+        $startUrl = $request->input('source_url', 'https://beyondchats.com/blogs/');
+        $maxNewArticles = 5;
+        $createdCount = 0;
+        $maxPages = 3; // Safety limit to prevent infinite loops
+        $currentPage = 1;
+        $urlToScrape = $startUrl;
 
-            $crawler = new \Symfony\Component\DomCrawler\Crawler($response->body());
-            $articles = [];
-            
-            // 2. Find article links (flexible selectors)
-            $crawler->filter('article, .blog-post, .post-item')->each(function ($node) use (&$articles) {
-                if (count($articles) >= 5) return;
+        try {
+            while ($createdCount < $maxNewArticles && $currentPage <= $maxPages) {
                 
-                try {
-                    $titleNode = $node->filter('h2 a, h3 a, .post-title a, .entry-title a')->first();
-                    if ($titleNode->count() === 0) return;
+                $response = Http::withoutVerifying()->timeout(30)->get($urlToScrape);
+                
+                if (!$response->successful()) { 
+                    break; 
+                }
+
+                $crawler = new \Symfony\Component\DomCrawler\Crawler($response->body());
+                $currentNewOnPage = 0;
+
+                // Loop through articles on THIS page
+                $articleNodes = $crawler->filter('article, .blog-post, .post-item');
+                
+                foreach ($articleNodes as $node) {
+                    if ($createdCount >= $maxNewArticles) break;
+
+                    $crawlerNode = new \Symfony\Component\DomCrawler\Crawler($node);
+                    $titleNode = $crawlerNode->filter('h2 a, h3 a, .post-title a, .entry-title a')->first();
                     
+                    if ($titleNode->count() === 0) continue;
+
                     $title = trim($titleNode->text());
-                    $url = $titleNode->attr('href');
                     
+                    // CHECK DB FIRST
+                    if (Article::where('title', $title)->exists()) {
+                        continue; // Skip if already exists
+                    }
+
+                    $url = $titleNode->attr('href');
                     if (!str_starts_with($url, 'http')) {
                         $url = 'https://www.beyondchats.com' . $url;
                     }
-                    
-                    // 3. Request each article page to get full content
+
+                    // Scrape deep content
                     $content = $this->scrapeArticleContent($url);
-                    
+
                     if ($content) {
-                        $articles[] = [
+                        Article::create([
                             'title' => $title,
                             'content' => $content,
                             'original_url' => $url,
                             'source' => 'original',
                             'created_at' => now(),
                             'updated_at' => now(),
-                        ];
+                        ]);
+                        $createdCount++;
+                        $currentNewOnPage++;
                     }
-                } catch (\Exception $e) {
-                    // Continue to next article if one fails
                 }
-            });
-            
-            // 4. Save to Database
-            $created = 0;
-            foreach ($articles as $articleData) {
-                if (!Article::where('title', $articleData['title'])->exists()) {
-                    Article::create($articleData);
-                    $created++;
+
+                // If we found NO new articles on this page, try the next page
+                if ($createdCount < $maxNewArticles) {
+                    $nextPageLink = $crawler->filter('a.next.page-numbers, a.next');
+                    if ($nextPageLink->count() > 0) {
+                        $urlToScrape = $nextPageLink->attr('href');
+                        $currentPage++;
+                    } else {
+                        break; // No more pages
+                    }
+                } else {
+                    break; // Met quota
                 }
             }
-            
-            if ($created === 0 && empty($articles)) {
-                 // ONLY if real scraping fails completely do we error out (no automatic fallback to mock)
-                 return response()->json(['error' => 'No articles found correctly. Check formatting.'], 404);
-            }
-            
+
             return response()->json([
-                'message' => "Successfully scraped $created new articles from web!",
-                'created' => $created
+                'message' => "Successfully scraped $createdCount new articles.",
+                'created' => $createdCount
             ]);
 
         } catch (\Exception $e) {
@@ -109,18 +122,36 @@ class WorkerController extends Controller
     private function scrapeArticleContent($url)
     {
         try {
-            $response = Http::timeout(15)->get($url);
+            $response = Http::withoutVerifying()->timeout(15)->get($url);
             if (!$response->successful()) return null;
             
             $crawler = new \Symfony\Component\DomCrawler\Crawler($response->body());
             
             // Try common content selectors
-            $selectors = ['.entry-content', '.post-content', '.article-body', 'article .content'];
+            // Try common content selectors (Prioritize Elementor)
+            $selectors = [
+                 '.elementor-widget-theme-post-content', 
+                 '.elementor-widget-text-editor',
+                 '.entry-content', 
+                 '.post-content', 
+                 '.article-body', 
+                 'article .content'
+            ];
             
             foreach ($selectors as $selector) {
                 $node = $crawler->filter($selector);
                 if ($node->count() > 0) {
-                    return trim($node->text());
+                     $html = $node->html();
+                     // Basic cleaning: add newlines for breaks/paragraphs
+                     $html = str_replace(['<br>', '<br/>', '<p>', '</div>'], ["\n", "\n", "\n\n", "\n"], $html);
+                     $text = strip_tags($html);
+                     $text = preg_replace('/\s+/', ' ', $text); // Collapse multiple spaces
+                     $text = trim($text);
+
+                     // If we found a substantial amount of text, return it
+                     if (strlen($text) > 150) {
+                         return $text;
+                     }
                 }
             }
             

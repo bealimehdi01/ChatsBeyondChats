@@ -45,9 +45,26 @@ A dedicated **/admin** interface for manual control:
 
 **Phase 2: Node.js Worker ✅**
 - Fetches latest article from API
-- Searches Google using Puppeteer
-- Scrapes top 2 reference articles
-- Enhances content with Google Gemini LLM (w/ Perplexity fallback)
+- Searches Google
+## ⚙️ How it Works
+
+The application operates on a 4-step automated cycle:
+
+1.  **📚 Finds Old Content**: Scrapes the oldest blog posts from the target website (BeyondChats). It intelligently paginates to find content that hasn't been enhanced yet.
+2.  **🔍 Researches Competitors**: For each article, it searches Google for the top-ranking results on that specific topic to understand what makes them successful.
+3.  **🤖 Rewrites Using AI**:
+    *   **Primary**: Uses **Google Gemini 2.0 Flash** to rewrite the article for better flow, clarity, and SEO.
+    *   **Fallback**: If Gemini hits rate limits (common on free tier), it seamlessly switches to **Perplexity (Sonar)** to ensure the job always completes.
+4.  **📝 Publishes**: The enhanced article is saved to the database, with cleaned formatting, ready for comparison.
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+*   **Node.js** (v18+)
+*   **PHP** (v8.2+) with Composer
+*   **Google Gemini API Key** (Free)
+*   **Perplexity API Key** (Optional, for fallback)
 - Publishes enhanced version with citations stripped ([1][2] removed)
 
 **Phase 3: React Frontend ✅**

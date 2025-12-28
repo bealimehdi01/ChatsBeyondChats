@@ -9,7 +9,6 @@ class Scraper {
     async init() {
         this.browser = await puppeteer.launch({
             headless: true,
-            executablePath: '/usr/bin/chromium' || '/usr/bin/chromium-browser',
             args: ['--no-sandbox', '--disable-setuid-sandbox']
         });
     }

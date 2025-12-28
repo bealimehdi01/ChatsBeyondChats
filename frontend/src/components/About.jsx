@@ -28,22 +28,22 @@ const About = () => {
                     <div className="space-y-4 mb-6">
                         <div className="bg-blue-50 p-4 rounded-lg">
                             <h4 className="font-bold text-blue-900 mb-2">1. 📚 Finds Old Content</h4>
-                            <p className="text-blue-800">Scrapes the 5 oldest blog posts from BeyondChats website</p>
+                            <p className="text-blue-800">Scrapes the oldest blog posts, ensuring it never processes the same article twice. It intelligently paginates through the blog to find fresh content.</p>
                         </div>
 
                         <div className="bg-purple-50 p-4 rounded-lg">
                             <h4 className="font-bold text-purple-900 mb-2">2. 🔍 Researches Competitors</h4>
-                            <p className="text-purple-800">Takes each article title → Searches Google → Finds top 2 results from competitors → Analyzes what makes them rank</p>
+                            <p className="text-purple-800">For each article, it Google searches the topic to find top-ranking competitor articles to use as a quality benchmark.</p>
                         </div>
 
                         <div className="bg-green-50 p-4 rounded-lg">
                             <h4 className="font-bold text-green-900 mb-2">3. 🤖 Rewrites Using AI</h4>
-                            <p className="text-green-800">Sends original article + competitor insights to Google Gemini or Perplexity → AI rewrites to match quality and formatting of top results</p>
+                            <p className="text-green-800">Sends the original content + competitor insights to **Google Gemini**. If Gemini (Free Tier) is busy, it automatically falls back to **Perplexity's Sonar** model to ensure reliability.</p>
                         </div>
 
                         <div className="bg-orange-50 p-4 rounded-lg">
                             <h4 className="font-bold text-orange-900 mb-2">4. 📝 Publishes</h4>
-                            <p className="text-orange-800">Saves enhanced version to database → Adds competitor links as references</p>
+                            <p className="text-orange-800">Saves the enhanced version to the database, complete with cleaned formatting and references, ready for review.</p>
                         </div>
                     </div>
 

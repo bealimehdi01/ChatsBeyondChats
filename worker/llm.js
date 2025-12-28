@@ -57,7 +57,7 @@ Write a comprehensive article. DO NOT USE CITATION NUMBERS.`;
         const response = await axios.post(
             'https://api.perplexity.ai/chat/completions',
             {
-                model: 'llama-3.1-sonar-small-128k-online',
+                model: 'sonar',
                 messages: [
                     {
                         role: 'system',
@@ -119,7 +119,10 @@ Write a comprehensive article. DO NOT USE CITATION NUMBERS.`;
                         console.log('LLM: ✅ Perplexity success (citations stripped)');
                         return result;
                     } catch (perplexityError) {
-                        console.error('LLM: ❌ Both failed');
+                        console.error('LLM: ❌ Perplexity failed:', perplexityError.message);
+                        if (perplexityError.response) {
+                            console.error('LLM: Perplexity Response:', JSON.stringify(perplexityError.response.data));
+                        }
                         throw new Error(`Both LLM providers failed`);
                     }
                 }
