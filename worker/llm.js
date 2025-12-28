@@ -67,7 +67,7 @@ Rewrite the article to be comprehensive, well-structured, and engaging. Make it 
                 messages: [
                     {
                         role: 'system',
-                        content: 'You are a professional content writer who creates high-quality, comprehensive articles.'
+                        content: 'You are a professional content writer who creates high-quality, comprehensive articles WITHOUT using inline citations or reference numbers.'
                     },
                     {
                         role: 'user',
@@ -88,30 +88,42 @@ Rewrite the article to be comprehensive, well-structured, and engaging. Make it 
         return response.data.choices[0].message.content;
     }
 
+    // Remove inline citation numbers like [1], [2], [1][2][3], etc.
+    removeCitations(text) {
+        // Remove patterns like [1], [2], [1][2], [1][2][3], etc.
+        return text
+            .replace(/\[\d+\](\[\d+\])*/g, '') // Remove consecutive citations like [1][2][3]
+            .replace(/\s+/g, ' ') // Normalize spaces
+            .replace(/\*\*/g, '') // Remove bold markdown if present
+            .trim();
+    }
+
     async enhanceContent(originalContent, referenceText) {
         // Try Gemini first
         if (this.geminiApiKey) {
             try {
                 console.log('LLM: Attempting enhancement via Gemini...');
                 const result = await this.enhanceWithGemini(originalContent, referenceText);
+                const cleaned = this.removeCitations(result);
                 console.log('LLM: ✅ Enhanced successfully with Gemini');
-                return result;
+                return cleaned;
             } catch (error) {
                 console.warn('LLM: ⚠️ Gemini failed:', error.message);
 
-                // If Gemini fails due to rate limit or any error, try Perplexity
+                // If Gemini fails, try Perplexity
                 if (this.perplexityApiKey) {
                     console.log('LLM: Falling back to Perplexity...');
                     try {
                         const result = await this.enhanceWithPerplexity(originalContent, referenceText);
-                        console.log('LLM: ✅ Enhanced successfully with Perplexity');
-                        return result;
+                        const cleaned = this.removeCitations(result);
+                        console.log('LLM: ✅ Enhanced successfully with Perplexity (citations stripped)');
+                        return cleaned;
                     } catch (perplexityError) {
                         console.error('LLM: ❌ Perplexity also failed:', perplexityError.message);
                         throw new Error(`Both LLM providers failed. Gemini: ${error.message}, Perplexity: ${perplexityError.message}`);
                     }
                 } else {
-                    throw error; // No fallback available
+                    throw error;
                 }
             }
         }
@@ -120,8 +132,9 @@ Rewrite the article to be comprehensive, well-structured, and engaging. Make it 
         if (this.perplexityApiKey) {
             console.log('LLM: Using Perplexity (no Gemini key configured)...');
             const result = await this.enhanceWithPerplexity(originalContent, referenceText);
-            console.log('LLM: ✅ Enhanced successfully with Perplexity');
-            return result;
+            const cleaned = this.removeCitations(result);
+            console.log('LLM: ✅ Enhanced successfully with Perplexity (citations stripped)');
+            return cleaned;
         }
 
         throw new Error('No LLM API keys configured');
