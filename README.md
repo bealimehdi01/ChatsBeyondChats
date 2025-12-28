@@ -28,23 +28,12 @@ A **React dashboard** that displays articles with a **side-by-side comparison**:
 - ✨ **Enhanced**: The new AI-rewritten version with better formatting and updated information
 - 📱 **Responsive**: Works seamlessly on mobile and desktop
 
-### 2️⃣ The Background Work (How It Works)
-
-The app performs a **four-step automated cycle**:
-
-1. **Finds Old Content** 📚  
-   Scrapes the 5 oldest blog posts from BeyondChats website
-
-2. **Researches Competitors** 🔍  
-   Takes each article title (e.g., "How to use Chatbots") → Searches Google → Finds top 2 results from competitors → Analyzes what makes them rank
-
-3. **Rewrites Using AI** 🤖  
-   Sends original article + competitor insights to Google Gemini → AI rewrites to match quality and formatting of top results
-
-4. **Publishes** 📝  
-   Saves enhanced version to database → Adds competitor links as references at bottom
-
-**Result**: Old content automatically transformed into ranking-quality content, displayed on a professional web interface.
+### 3️⃣ Admin Control Panel (New!)
+A dedicated **/admin** interface for manual control:
+- **Manual Mode**: Trigger scraping or enhancement on demand
+- **Auto Mode**: Run worker on a configurable schedule (5-60 mins)
+- **Fetch Original**: Instantly scrape fresh articles
+- **AI Enhance**: Enhances specific articles with a click
 
 ## 📋 Assignment Completion
 
@@ -52,18 +41,19 @@ The app performs a **four-step automated cycle**:
 - Scraped 5 articles from BeyondChats blog
 - SQLite database with migrations
 - Full CRUD API (`/api/articles`)
+- Admin APIs (`/api/settings`, `/scrape`, `/enhance`)
 
 **Phase 2: Node.js Worker ✅**
 - Fetches latest article from API
 - Searches Google using Puppeteer
 - Scrapes top 2 reference articles
-- Enhances content with Google Gemini LLM
-- Publishes enhanced version with citations
+- Enhances content with Google Gemini LLM (w/ Perplexity fallback)
+- Publishes enhanced version with citations stripped ([1][2] removed)
 
 **Phase 3: React Frontend ✅**
 - Modern UI with Tailwind CSS
 - Displays original + enhanced articles
-- Responsive design
+- Admin Panel for system control
 - Deployed on Vercel
 
 ## 🏗️ Architecture
@@ -156,6 +146,12 @@ GET    /api/articles/latest # Get latest original article
 POST   /api/articles       # Create article
 PUT    /api/articles/{id}  # Update article
 DELETE /api/articles/{id}  # Delete article
+
+### Admin & Worker Control
+GET    /api/settings       # Get worker configuration
+PUT    /api/settings       # Update mode/interval
+POST   /api/scrape         # Trigger manual scrape
+POST   /api/enhance/{id}   # Trigger specific enhancement
 ```
 
 **Example Response:**
