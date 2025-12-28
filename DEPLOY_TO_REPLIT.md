@@ -17,7 +17,7 @@ The **Frontend** (React) should be deployed separately to **Vercel** (Recommende
     *   Click **Import**.
 
 2.  **Wait for Install**:
-    *   Replit will read `replit.nix` and install PHP, Composer, SQLite, Node.js, and Chromium automatically.
+    *   Replit will read `replit.nix` and install PHP, Composer, SQLite, and Node.js automatically.
     *   It might take 2-3 minutes.
 
 3.  **Configure Secrets (Environment Variables)**:
@@ -78,3 +78,8 @@ The **Frontend** (React) should be deployed separately to **Vercel** (Recommende
 
 *   **Replit Sleeping**: Replit puts free apps to sleep. If your Frontend says "Network Error", simply open your Replit tab to wake it up.
 *   **Database Locked**: SQLite on Replit can rarely get locked. Restarting the Repl fixes it.
+*   **Puppeteer/Chromium Errors**:
+    *   If you see errors like `error while loading shared libraries` in the Worker logs:
+    *   This means the bundled Chromium needs system libraries.
+    *   You may need to add simple packages to `replit.nix` like `pkgs.nss`, `pkgs.libnss3`, `pkgs.gtk3`, `pkgs.alsa-lib`.
+    *   **Try this first:** Run `npm install` inside the `worker` folder again in the Replit Shell to ensure Puppeteer downloads its correct binary.
