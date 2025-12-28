@@ -10,30 +10,15 @@ const api = axios.create({
     },
 });
 
+// ========== ARTICLES ==========
+
 export const getArticles = async () => {
     try {
         const response = await api.get('/articles');
         return response.data;
     } catch (error) {
         console.error("API Error - getArticles:", error);
-        // Return dummy data for frontend demo if backend is offline
-        return [
-            {
-                id: 1,
-                title: "The Future of AI Chatbots",
-                content: "Chatbots are evolving rapidly...",
-                source: "original",
-                created_at: "2023-10-27"
-            },
-            {
-                id: 2,
-                title: "The Future of AI Chatbots (Enhanced)",
-                content: "Chatbots are evolving rapidly. According to recent studies...",
-                source: "enhanced",
-                original_article_id: 1,
-                created_at: "2023-10-28"
-            }
-        ];
+        return [];
     }
 };
 
@@ -43,14 +28,7 @@ export const getArticle = async (id) => {
         return response.data;
     } catch (error) {
         console.error("API Error - getArticle:", error);
-        // Mock
-        return {
-            id: 1,
-            title: "The Future of AI Chatbots",
-            content: "Full content here...",
-            source: "original",
-            created_at: "2023-10-27"
-        };
+        throw error;
     }
 };
 
@@ -60,6 +38,54 @@ export const deleteArticle = async (id) => {
         return response.data;
     } catch (error) {
         console.error("API Error - deleteArticle:", error);
+        throw error;
+    }
+};
+
+// ========== ADMIN SETTINGS ==========
+
+export const getSettings = async () => {
+    try {
+        const response = await api.get('/settings');
+        return response.data;
+    } catch (error) {
+        console.error("API Error - getSettings:", error);
+        return {
+            mode: 'manual',
+            interval_minutes: 5,
+            source_url: 'https://beyondchats.com/blogs/'
+        };
+    }
+};
+
+export const updateSettings = async (settings) => {
+    try {
+        const response = await api.put('/settings', settings);
+        return response.data;
+    } catch (error) {
+        console.error("API Error - updateSettings:", error);
+        throw error;
+    }
+};
+
+// ========== SCRAPING & ENHANCEMENT ==========
+
+export const triggerScrape = async (sourceUrl) => {
+    try {
+        const response = await api.post('/scrape', { source_url: sourceUrl });
+        return response.data;
+    } catch (error) {
+        console.error("API Error - triggerScrape:", error);
+        throw error;
+    }
+};
+
+export const triggerEnhance = async (articleId) => {
+    try {
+        const response = await api.post(`/enhance/${articleId}`);
+        return response.data;
+    } catch (error) {
+        console.error("API Error - triggerEnhance:", error);
         throw error;
     }
 };

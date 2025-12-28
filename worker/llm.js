@@ -6,7 +6,6 @@ class LLMService {
         this.geminiApiKey = geminiApiKey;
         this.perplexityApiKey = perplexityApiKey;
 
-        // Initialize Gemini if key provided
         if (geminiApiKey) {
             this.gemini = new GoogleGenerativeAI(geminiApiKey);
             this.geminiModel = this.gemini.getGenerativeModel({ model: 'gemini-2.0-flash-exp' });
@@ -18,25 +17,24 @@ class LLMService {
             throw new Error('Gemini API key not configured');
         }
 
-        const prompt = `You are a professional content writer. Rewrite the following article to match the quality and style of top-ranking content.
+        const prompt = `You are a professional content writer. Rewrite the following article to be comprehensive and well-structured.
 
-IMPORTANT RULES:
-- Do NOT use inline citation numbers like [1], [2], etc.
-- Write naturally without any bracketed references in the text
-- Create original, comprehensive content inspired by the references
-- If you want to cite sources, add a "Sources:" section at the very end with actual URLs
+CRITICAL RULES:
+- Write naturally WITHOUT any citation numbers like [1], [2], [3]
+- Do NOT include bracketed numbers anywhere in the text
+- Create flowing, readable paragraphs
 
 Original Article:
 ${originalContent}
 
-Reference Content (for style and depth):
+Reference Content:
 ${referenceText}
 
-Rewrite the article to be comprehensive, well-structured, and engaging. Make it at least as detailed as the references.`;
+Write a comprehensive, engaging article. NO CITATION NUMBERS.`;
 
         const result = await this.geminiModel.generateContent(prompt);
         const response = await result.response;
-        return response.text();
+        return this.cleanOutput(response.text());
     }
 
     async enhanceWithPerplexity(originalContent, referenceText) {
@@ -44,21 +42,17 @@ Rewrite the article to be comprehensive, well-structured, and engaging. Make it 
             throw new Error('Perplexity API key not configured');
         }
 
-        const prompt = `You are a professional content writer. Rewrite the following article to match the quality and style of top-ranking content.
+        const prompt = `Rewrite this article to be comprehensive and well-structured.
 
-IMPORTANT RULES:
-- Do NOT use inline citation numbers like [1], [2], etc.
-- Write naturally without any bracketed references in the text
-- Create original, comprehensive content inspired by the references
-- If you want to cite sources, add a "Sources:" section at the very end with actual URLs
+CRITICAL: Write naturally WITHOUT any citation numbers. NO [1], [2], [3] etc.
 
 Original Article:
 ${originalContent}
 
-Reference Content (for style and depth):
+Reference Content:
 ${referenceText}
 
-Rewrite the article to be comprehensive, well-structured, and engaging. Make it at least as detailed as the references.`;
+Write a comprehensive article. DO NOT USE CITATION NUMBERS.`;
 
         const response = await axios.post(
             'https://api.perplexity.ai/chat/completions',
@@ -67,7 +61,7 @@ Rewrite the article to be comprehensive, well-structured, and engaging. Make it 
                 messages: [
                     {
                         role: 'system',
-                        content: 'You are a professional content writer who creates high-quality, comprehensive articles WITHOUT using inline citations or reference numbers.'
+                        content: 'You are a content writer. NEVER use citation numbers like [1], [2], [3]. Write naturally without any bracketed references.'
                     },
                     {
                         role: 'user',
@@ -85,16 +79,25 @@ Rewrite the article to be comprehensive, well-structured, and engaging. Make it 
             }
         );
 
-        return response.data.choices[0].message.content;
+        return this.cleanOutput(response.data.choices[0].message.content);
     }
 
-    // Remove inline citation numbers like [1], [2], [1][2][3], etc.
-    removeCitations(text) {
-        // Remove patterns like [1], [2], [1][2], [1][2][3], etc.
+    // AGGRESSIVE citation and formatting cleanup
+    cleanOutput(text) {
         return text
-            .replace(/\[\d+\](\[\d+\])*/g, '') // Remove consecutive citations like [1][2][3]
-            .replace(/\s+/g, ' ') // Normalize spaces
-            .replace(/\*\*/g, '') // Remove bold markdown if present
+            // Remove citation patterns: [1], [2], [1][2][3], [1,2,3], [1-5], etc.
+            .replace(/\[\d+(?:,\s*\d+)*\]/g, '')  // [1], [1,2], [1, 2, 3]
+            .replace(/\[\d+(?:\]\[\d+)+\]/g, '')  // [1][2][3]
+            .replace(/\[\d+-\d+\]/g, '')          // [1-5]
+            .replace(/\[\d+\]/g, '')              // Any remaining [N]
+            // Remove markdown bold markers
+            .replace(/\*\*/g, '')
+            // Clean up extra spaces
+            .replace(/\s+/g, ' ')
+            .replace(/\s+\./g, '.')
+            .replace(/\s+,/g, ',')
+            // Clean up empty parentheses that might remain
+            .replace(/\(\s*\)/g, '')
             .trim();
     }
 
@@ -102,39 +105,33 @@ Rewrite the article to be comprehensive, well-structured, and engaging. Make it 
         // Try Gemini first
         if (this.geminiApiKey) {
             try {
-                console.log('LLM: Attempting enhancement via Gemini...');
+                console.log('LLM: Trying Gemini...');
                 const result = await this.enhanceWithGemini(originalContent, referenceText);
-                const cleaned = this.removeCitations(result);
-                console.log('LLM: ✅ Enhanced successfully with Gemini');
-                return cleaned;
+                console.log('LLM: ✅ Gemini success');
+                return result;
             } catch (error) {
                 console.warn('LLM: ⚠️ Gemini failed:', error.message);
 
-                // If Gemini fails, try Perplexity
                 if (this.perplexityApiKey) {
                     console.log('LLM: Falling back to Perplexity...');
                     try {
                         const result = await this.enhanceWithPerplexity(originalContent, referenceText);
-                        const cleaned = this.removeCitations(result);
-                        console.log('LLM: ✅ Enhanced successfully with Perplexity (citations stripped)');
-                        return cleaned;
+                        console.log('LLM: ✅ Perplexity success (citations stripped)');
+                        return result;
                     } catch (perplexityError) {
-                        console.error('LLM: ❌ Perplexity also failed:', perplexityError.message);
-                        throw new Error(`Both LLM providers failed. Gemini: ${error.message}, Perplexity: ${perplexityError.message}`);
+                        console.error('LLM: ❌ Both failed');
+                        throw new Error(`Both LLM providers failed`);
                     }
-                } else {
-                    throw error;
                 }
+                throw error;
             }
         }
 
-        // If no Gemini key, try Perplexity directly
         if (this.perplexityApiKey) {
-            console.log('LLM: Using Perplexity (no Gemini key configured)...');
+            console.log('LLM: Using Perplexity...');
             const result = await this.enhanceWithPerplexity(originalContent, referenceText);
-            const cleaned = this.removeCitations(result);
-            console.log('LLM: ✅ Enhanced successfully with Perplexity (citations stripped)');
-            return cleaned;
+            console.log('LLM: ✅ Perplexity success (citations stripped)');
+            return result;
         }
 
         throw new Error('No LLM API keys configured');
