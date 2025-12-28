@@ -6,7 +6,7 @@ cd backend
 if [ ! -f "database/database.sqlite" ]; then
     touch database/database.sqlite
 fi
-composer install --no-interaction --prefer-dist
+composer update --no-interaction --prefer-dist
 php artisan migrate --force
 
 # Start Laravel backend in background
@@ -19,6 +19,7 @@ sleep 7
 # Start worker
 cd ../worker
 npm install
+npx puppeteer browsers install chrome
 API_URL=http://localhost:8000/api node index.js &
 WORKER_PID=$!
 
