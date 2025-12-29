@@ -13,7 +13,7 @@ A full-stack AI content platform that scrapes, enhances, and displays articles u
 | Service | URL | Status |
 |---------|-----|--------|
 | **Frontend** | [https://chats-beyond-chats.vercel.app/](https://chats-beyond-chats.vercel.app/) | ✅ Live |
-| **Backend API** | [https://a39dd7fb-142d-4563-b080-e180989e306f-00-2pjgspya016n2.pike.replit.dev:8000/api/articles](https://a39dd7fb-142d-4563-b080-e180989e306f-00-2pjgspya016n2.pike.replit.dev:8000/api/articles) | ✅ Live |
+| **Backend API** | [https://chats-beyond-chats--sayyedalimehdi0.replit.app/api/articles](https://chats-beyond-chats--sayyedalimehdi0.replit.app/api/articles) | ✅ Live |
 | **Worker** | Running on Replit (background service) | ✅ Active |
 
 ## 💡 What Does This App Do?
@@ -46,6 +46,14 @@ A dedicated **/admin** interface for manual control:
 **Phase 2: Node.js Worker ✅**
 - Fetches latest article from API
 - Searches Google
+- Publishes enhanced version with citations stripped ([1][2] removed)
+
+**Phase 3: React Frontend ✅**
+- Modern UI with Tailwind CSS
+- Displays original + enhanced articles
+- Admin Panel for system control
+- Deployed on Vercel
+
 ## ⚙️ How it Works
 
 The application operates on a 4-step automated cycle:
@@ -65,13 +73,6 @@ The application operates on a 4-step automated cycle:
 *   **PHP** (v8.2+) with Composer
 *   **Google Gemini API Key** (Free)
 *   **Perplexity API Key** (Optional, for fallback)
-- Publishes enhanced version with citations stripped ([1][2] removed)
-
-**Phase 3: React Frontend ✅**
-- Modern UI with Tailwind CSS
-- Displays original + enhanced articles
-- Admin Panel for system control
-- Deployed on Vercel
 
 ## 🏗️ Architecture
 
@@ -194,9 +195,10 @@ APP_KEY=[generated]
 DB_CONNECTION=sqlite
 ```
 
-**Frontend (.env.production):**
+**Frontend (.env.production / Vercel):**
 ```env
-VITE_API_URL=https://[replit-url]:8000/api
+VITE_API_URL=https://[replit-url]/api
+# Example: https://chats-beyond-chats--sayyedalimehdi0.replit.app/api
 ```
 
 **Worker (.env):**
@@ -244,48 +246,43 @@ ChatsBeyondChats/
 │   ├── scraper.js
 │   └── package.json
 │
+├── deploy.sh            # Replit deployment script
 ├── start_all.ps1        # Local dev launcher
 └── README.md
 ```
 
-## 🚀 Deployment
+## 🚀 Deployment Guide
 
 ### Vercel (Frontend)
-```bash
-cd frontend
-vercel --prod
-```
+1. Fork repository.
+2. Import project to Vercel (select `frontend` root).
+3. Set Environment Variable: `VITE_API_URL` = `https://[your-replit-url].replit.app/api`
+   *   **Important**: Must end with `/api` and use `https`.
+   *   Example: `https://chats-beyond-chats--sayyedalimehdi0.replit.app/api`
+4. Deploy.
 
 ### Replit (Backend + Worker)
 1. Import from GitHub: `https://github.com/bealimehdi01/ChatsBeyondChats`
-2. Add Secret: `LLM_API_KEY`
-3. Click "Run"
+2. **Setup Secrets**:
+   - `LLM_API_KEY` (Gemini API Key)
+3. **Configure Deployment**:
+   - Set **Run Command** to: `bash deploy.sh`
+   - Set **Build Command** to: (Empty or default)
+4. Click **Deploy**.
+5. **Initial Setup**: After first deployment, open Shell and run:
+   ```bash
+   cd backend && php artisan scrape:initial
+   ```
 
 ## 🧪 Testing
 
 **Test Backend:**
 ```bash
-curl https://[replit-url]:8000/api/articles
+curl https://chats-beyond-chats--sayyedalimehdi0.replit.app/api/articles
 ```
 
-**Test Worker Locally:**
-```bash
-cd worker
-node index.js
-# Watch console for job cycles
-```
-
-## 📝 Features
-
-- ✅ Article scraping from BeyondChats blog
-- ✅ Full CRUD REST API
-- ✅ AI-powered content enhancement
-- ✅ Google Search integration
-- ✅ Web scraping with Puppeteer
-- ✅ Responsive React UI
-- ✅ Live deployment
-- ✅ Background worker processing
-- ✅ Citation system
+**Test Worker:**
+Check the Replit Shell (or Logs) to see the worker picking up jobs if Auto Mode is enabled.
 
 ## 👨‍💻 Author
 
