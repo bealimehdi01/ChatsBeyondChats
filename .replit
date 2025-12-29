@@ -5,7 +5,6 @@ entrypoint = "backend/public/index.php"
 channel = "stable-23_11"
 
 [deployment]
-[deployment]
 run = ["sh", "-c", "bash deploy.sh"]
 deploymentTarget = "cloudrun"
 
